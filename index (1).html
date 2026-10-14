@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AutoSort — Smart Laundry System (Web Demo)</title>
+<style>
+:root{--b:#1d6bff;--ink:#0b1a3a;--mut:#5b6b8c}
+*{box-sizing:border-box;margin:0;font-family:Inter,"Segoe UI",system-ui,sans-serif}
+html,body{height:100%;overflow:hidden;color:var(--ink);background:radial-gradient(ellipse at 50% 38%,#fff,#e9eff9 65%,#d8e1f0)}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.glass{position:fixed;background:rgba(255,255,255,.72);backdrop-filter:blur(14px);border:1px solid #fff;border-radius:20px;box-shadow:0 10px 40px rgba(30,70,160,.15);padding:14px 18px}
+#brand{top:22px;left:24px;width:300px}
+.logo{font-size:30px;font-weight:300;letter-spacing:-.5px}.logo b{font-weight:800;color:var(--b)}
+.sub{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin:2px 0 10px}
+.row{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+.dot{width:10px;height:10px;border-radius:50%;background:#aab4c8}.dot.on{background:#1d6bff;box-shadow:0 0 10px #1d6bff}
+.opl{font-size:12px;color:var(--mut);margin-top:6px}.opl b{color:var(--ink)}
+#tools{top:22px;right:24px;display:flex;gap:8px;flex-wrap:wrap;max-width:560px;justify-content:flex-end;padding:10px}
+.tb{border:0;background:#fff;border-radius:12px;padding:8px 13px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:0 2px 8px rgba(30,70,160,.12);transition:.2s}
+.tb:hover{background:var(--b);color:#fff;transform:translateY(-2px)}
+#log{bottom:24px;left:24px;width:410px}
+#log h4{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+#cur{font-size:18px;font-weight:700;color:var(--b)}
+.bar{height:8px;border-radius:6px;background:#dde5f4;overflow:hidden;margin:8px 0 4px}.bar>div{height:100%;width:0;background:linear-gradient(90deg,#4aa8ff,#1d6bff);transition:width .15s}
+.pr{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+#lines{list-style:none;font-size:12.5px;margin:8px 0;min-height:88px}#lines li{padding:2px 0;color:#34466b}#lines li:first-child{font-weight:700;color:var(--ink)}
+#exp{font-size:12px;color:var(--mut);border-top:1px solid #dde5f4;padding-top:8px;margin-bottom:8px}
+.dc{display:flex;gap:6px}.dc .tb{padding:6px 10px;font-size:12px}
+#banner{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:var(--b);color:#fff;padding:9px 22px;border-radius:30px;font-weight:700;font-size:14px;letter-spacing:.5px;opacity:0;transition:.3s;pointer-events:none;box-shadow:0 6px 24px rgba(29,107,255,.4)}
+#toast{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-10px);background:#0b1a3a;color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+#toast.s{opacity:1;transform:translateX(-50%)}
+#phone{position:fixed;right:26px;bottom:18px;width:268px;background:#0a0b0f;border-radius:44px;padding:9px;box-shadow:0 24px 60px rgba(10,30,90,.35),inset 0 0 0 2px #2b2f3a;animation:fl 5s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-6px)}}
+.scr{background:linear-gradient(180deg,#f4f8ff,#e6eefc);border-radius:36px;padding:12px 12px 14px;position:relative;overflow:hidden}
+.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:76px;height:20px;border-radius:12px;background:#0a0b0f}
+.sb{display:flex;justify-content:space-between;font-size:11px;font-weight:700;padding:0 10px 14px}
+.ah h3{font-size:17px;font-weight:800}.dn{font-size:11.5px;color:var(--mut)}.cn{font-size:11px;color:#0c8a4a;font-weight:600;margin:2px 0 8px;display:flex;align-items:center;gap:5px}.cn i{width:7px;height:7px;border-radius:50%;background:#1fc16b}
+.card{background:#fff;border-radius:16px;padding:10px 12px;margin-bottom:8px;box-shadow:0 2px 10px rgba(30,70,160,.08)}
+#pmsg{font-size:13px;font-weight:700;min-height:18px}.card .bar{margin:6px 0 3px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tile{border:0;background:#fff;border-radius:15px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);box-shadow:0 2px 8px rgba(30,70,160,.08);transition:.18s;position:relative}
+.tile:active{transform:scale(.94)}.tile:hover{box-shadow:0 4px 14px rgba(29,107,255,.25)}
+.tile .ic{font-size:18px;line-height:18px;color:var(--b)}.tile .tl{font-size:11.5px;font-weight:700}.tile small{font-size:9.5px;color:var(--mut)}
+.tile.act{background:linear-gradient(135deg,#3b8bff,#1d6bff);color:#fff}.tile.act .ic,.tile.act small{color:#e6f0ff}
+.tile.dim{opacity:.6}
+.sw{position:absolute;top:7px;right:8px;width:22px;height:12px;border-radius:8px;background:#ccd6ea;transition:.2s}.sw:after{content:"";position:absolute;top:2px;left:2px;width:8px;height:8px;border-radius:50%;background:#fff;transition:.2s}.act .sw{background:#9cc4ff}.act .sw:after{left:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:7px 0}
+.sm{border:0;border-radius:13px;height:36px;font-weight:700;font-size:12.5px;cursor:pointer;transition:.18s}.sm:active{transform:scale(.95)}
+.stop{background:#ffe4e4;color:#c0262d}.rst{background:#e3e9f6;color:#34466b}
+.demo{width:100%;border:0;border-radius:15px;height:44px;font-size:14px;font-weight:800;letter-spacing:1px;color:#fff;cursor:pointer;background:linear-gradient(135deg,#2a8bff,#6a3bff);box-shadow:0 6px 18px rgba(80,70,255,.4);transition:.2s}.demo:hover{filter:brightness(1.1)}.demo:active{transform:scale(.97)}
+#modal{position:fixed;inset:0;background:rgba(15,30,70,.4);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:20}
+#modal.o{display:flex}
+.mb{background:#fff;border-radius:24px;padding:28px 34px;width:640px;max-height:88vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.mb h2{font-size:24px;margin-bottom:10px}.mb ol{padding-left:22px;font-size:14.5px;line-height:1.75}.mb h5{margin:14px 0 4px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--b)}.mb p{font-size:13px;color:var(--mut);line-height:1.6}
+</style></head><body>
+<canvas id="c"></canvas>
+<div class="glass" id="brand"><div class="logo"><b>Auto</b>Sort</div><div class="sub">Smart Laundry System</div>
+<div class="row"><span class="dot" id="dot"></span><span id="st">Powered Off</span></div><div class="opl">Current operation: <b id="op">Idle</b></div></div>
+<div id="banner"></div><div id="toast"></div>
+<div class="glass" id="tools">
+<button class="tb" data-v="front">Front</button><button class="tb" data-v="side">Side</button><button class="tb" data-v="top">Top</button><button class="tb" data-v="iso">Isometric</button>
+<button class="tb" data-v="iso">Reset View</button><button class="tb" id="snd">🔊 Sound: On</button><button class="tb" id="fs">Fullscreen</button><button class="tb" id="man">User Manual</button></div>
+<div class="glass" id="log"><h4>Live Activity</h4><div id="cur">Idle</div>
+<div class="bar"><div id="lbar"></div></div><div class="pr"><span>Operation progress</span><span id="lpct">0%</span></div>
+<ul id="lines"></ul><div id="exp"></div>
+<div class="dc"><button class="tb" id="dpause">Pause</button><button class="tb" id="dresume">Resume</button><button class="tb" id="drestart">Restart</button><button class="tb" id="dstop">Stop Demo</button></div></div>
+<div id="phone"><div class="scr"><div class="notch"></div>
+<div class="sb"><span>9:41</span><span>5G ▮▮▮</span></div>
+<div class="ah"><h3>AutoSort Control</h3><div class="dn">AutoSort Smart Basket</div><div class="cn"><i></i>Connected — Demo Mode</div></div>
+<div class="card"><div id="pmsg">Device Off</div><div class="bar"><div id="pbar"></div></div><div class="pr"><span id="ppct">0%</span><span id="ptim"></span></div></div>
+<div class="grid">
+<button class="tile" data-a="power"><span class="sw"></span><span class="ic">⏻</span><span class="tl">Power</span><small id="s-power">Off</small></button>
+<button class="tile" data-a="lid"><span class="sw"></span><span class="ic">⌂</span><span class="tl" id="l-lid">Open Lid</span><small id="s-lid">Closed</small></button>
+<button class="tile" data-a="add"><span class="ic">＋</span><span class="tl">Add Laundry</span><small id="s-add">Empty</small></button>
+<button class="tile" data-a="sort"><span class="ic">⇄</span><span class="tl">Start Sorting</span><small id="s-sort">Idle</small></button>
+<button class="tile" data-a="uv"><span class="sw"></span><span class="ic">✺</span><span class="tl">UV-C Sanitize</span><small id="s-uv">Off</small></button>
+<button class="tile" data-a="air"><span class="sw"></span><span class="ic">≋</span><span class="tl">Airflow</span><small id="s-air">Off</small></button></div>
+<div class="two"><button class="sm stop" data-a="stop">■ Stop Operation</button><button class="sm rst" data-a="reset">↺ Reset Simulation</button></div>
+<button class="demo" data-a="demo">▶ RUN FULL DEMO</button></div></div>
+<div id="modal"><div class="mb"><h2>AutoSort Quick User Manual</h2><ol>
+<li>Turn on the AutoSort basket.</li><li>Open the lid.</li><li>Load clothes into the basket.</li><li>Connect to the simulated smartphone controller.</li><li>Select Automatic Sorting.</li><li>Start the sorting demonstration.</li><li>Close the lid before sanitization.</li><li>Run the UV-C simulation.</li><li>Activate airflow if desired.</li><li>Wait for completion and remove the clothes.</li></ol>
+<h5>Safety reminders</h5><p>Never open the lid during a UV-C cycle (the demo interlocks it). Keep hands clear of moving parts. UV-C here is a visual representation of an experimental sanitization-assistance feature — no guaranteed sterilization or bacteria elimination is claimed.</p>
+<h5>Conceptual simulation</h5><p>This web demo is not connected to hardware. The phone, sensors, sorting mechanism, UV-C and airflow are simulated for presentation purposes.</p>
+<div style="text-align:right;margin-top:16px"><button class="tb" id="mc" style="background:#1d6bff;color:#fff">Close</button></div></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const S={power:false,lid:'closed',locked:false,laundry:false,sorted:false,sorting:false,scanning:false,loading:false,uv:false,air:false,progress:0,timer:0,step:0,stepName:'',demo:false,paused:false,op:'Idle',msg:'Device Off'};
+window.addEventListener('unhandledrejection',e=>e.preventDefault());
+/* ---------- utils & task engine ---------- */
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2,seg=(u,a,b)=>ease(clamp((u-a)/(b-a)));
+function bounce(t){const n=7.5625,d=2.75;if(t<1/d)return n*t*t;if(t<2/d)return n*(t-=1.5/d)*t+.75;if(t<2.5/d)return n*(t-=2.25/d)*t+.9375;return n*(t-=2.625/d)*t+.984375}
+let tasks=[],epoch=0,paused=false;
+function anim(d,fn,key){return new Promise((res,rej)=>{if(key)tasks=tasks.filter(k=>{if(k.key===key){k.res();return false}return true});tasks.push({d:d*1000,t:0,fn,res,rej,key})})}
+const sleep=s=>anim(s,()=>{});
+function stepTasks(dt){if(paused)return;for(const k of tasks.slice()){k.t+=dt*1000;const u=Math.min(1,k.t/k.d);k.fn(u);if(u>=1){tasks.splice(tasks.indexOf(k),1);k.res()}}}
+function cancelAll(){epoch++;const t=tasks;tasks=[];t.forEach(k=>k.rej('cancel'))}
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let toastT;function toast(m){sfx('err');const t=$('toast');t.textContent=m;t.classList.add('s');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('s'),2200)}
+const logs=[];function say(m,op){S.msg=m;if(op)S.op=op;logs.unshift(m);if(logs.length>5)logs.pop();$('lines').innerHTML=logs.map(l=>'<li>'+l+'</li>').join('')}
+const idleOp=()=>S.power?'Device Ready':'Idle';
+/* ---------- sound (Web Audio, synthesized) ---------- */
+let AC=null,master,muted=false,L={};
+function ac(){if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C();master=AC.createGain();master.gain.value=muted?0:.55;master.connect(AC.destination);
+const nb=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;L.nb=nb;
+const mk=()=>{const g=AC.createGain();g.gain.value=0;g.connect(master);return g};
+L.uv=mk();[110,164.8,330].forEach((f,i)=>{const o=AC.createOscillator();o.type=i?'sine':'triangle';o.frequency.value=f;const q=AC.createGain();q.gain.value=i==2?.3:1;o.connect(q);q.connect(L.uv);o.start()});
+L.air=mk();{const s=AC.createBufferSource();s.buffer=nb;s.loop=true;const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=900;f.Q.value=.6;s.connect(f);f.connect(L.air);s.start()}
+L.mot=mk();{const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=62;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=220;o.connect(f);f.connect(L.mot);o.start();L.motO=o}}
+if(AC.state==='suspended')AC.resume();return AC}
+document.addEventListener('pointerdown',ac);
+function tone(f,d,type,v,t0,f2){if(!AC||muted)return;const t=AC.currentTime+(t0||0),o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)}
+function noise(d,f,v,t0,f2){if(!AC||muted)return;const t=AC.currentTime+(t0||0),s=AC.createBufferSource(),b=AC.createBiquadFilter(),g=AC.createGain();s.buffer=L.nb;b.type='bandpass';b.Q.value=1.2;b.frequency.setValueAtTime(f,t);if(f2)b.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(v,t+d*.2);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(b);b.connect(g);g.connect(master);s.start(t,Math.random());s.stop(t+d+.05)}
+function sfx(n,t0=0){if(!AC)return;switch(n){
+case 'tap':tone(1300,.04,'sine',.07);break;
+case 'on':[523,659,784,1047].forEach((f,i)=>tone(f,.45,'sine',.12,i*.09));tone(130,.6,'triangle',.1,0,260);break;
+case 'off':[784,523,392].forEach((f,i)=>tone(f,.3,'sine',.1,i*.1));break;
+case 'hinge':noise(.9,500,.1,0,1400);tone(220,.8,'triangle',.03,0,300);break;
+case 'thud':tone(90,.18,'sine',.3,0,45);noise(.08,300,.12);break;
+case 'drop':tone(110,.12,'sine',.18,t0,55);noise(.14,400,.09,t0);break;
+case 'scan':tone(400,2.4,'sine',.05,0,1500);for(let i=0;i<6;i++)tone(1800,.05,'square',.03,i*.4);break;
+case 'click':tone(800,.04,'square',.05,t0);break;
+case 'uvon':tone(180,1,'sawtooth',.05,0,900);tone(1200,.05,'square',.06,1);break;
+case 'air':noise(.8,400,.12,0,1800);break;
+case 'step':tone(660,.1,'sine',.08);tone(990,.12,'sine',.06,.08);break;
+case 'done':[784,988,1175,1568].forEach((f,i)=>tone(f,.5,'sine',.1,i*.11));break;
+case 'stop':tone(300,.12,'square',.07);tone(200,.18,'square',.07,.14);break;
+case 'err':tone(170,.16,'square',.06);break}}
+function ambient(){if(!AC)return;const T=AC.currentTime;L.uv.gain.setTargetAtTime(muted?0:uvV*.05,T,.15);L.air.gain.setTargetAtTime(muted?0:airOp*.05,T,.2);L.mot.gain.setTargetAtTime(muted?0:(S.sorting?.07:0),T,.1);L.motO.frequency.setTargetAtTime(S.sorting?72:55,T,.2)}
+/* ---------- renderer / scene ---------- */
+const R=new THREE.WebGLRenderer({canvas:$('c'),antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(32,1,.1,100);
+const ctl=new THREE.OrbitControls(cam,$('c'));ctl.enableDamping=true;ctl.dampingFactor=.07;ctl.minDistance=3;ctl.maxDistance=16;ctl.maxPolarAngle=Math.PI/2.02;
+scene.add(new THREE.HemisphereLight(0xffffff,0xbfcbe0,.5));
+const key=new THREE.DirectionalLight(0xffffff,1.15);key.position.set(4,9,6);key.castShadow=true;key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:1,far:25});key.shadow.bias=-.0004;scene.add(key);
+const fill=new THREE.DirectionalLight(0xdfe9ff,.55);fill.position.set(-6,3,-3);scene.add(fill);
+const fr=new THREE.DirectionalLight(0xffffff,.4);fr.position.set(0,2,8);scene.add(fr);
+{const es=new THREE.Scene();es.add(new THREE.Mesh(new THREE.BoxGeometry(30,20,30),new THREE.MeshBasicMaterial({color:0xcfd8e8,side:THREE.BackSide})));
+[[0,9.5,0,14,.2,14,3],[-14,4,2,.2,8,10,2],[14,4,2,.2,8,10,1.5],[0,5,14,12,6,.2,1.6]].forEach(a=>{const m=new THREE.Mesh(new THREE.BoxGeometry(a[3],a[4],a[5]),new THREE.MeshBasicMaterial({color:new THREE.Color(a[6],a[6],a[6])}));m.position.set(a[0],a[1],a[2]);es.add(m)});
+scene.environment=new THREE.PMREMGenerator(R).fromScene(es,.03).texture}
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.2}));gnd.rotation.x=-Math.PI/2;gnd.receiveShadow=true;scene.add(gnd);
+{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,10,64,64,64);g.addColorStop(0,'rgba(20,35,70,.38)');g.addColorStop(1,'rgba(20,35,70,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
+const b=new THREE.Mesh(new THREE.PlaneGeometry(3.8,3.3),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));b.rotation.x=-Math.PI/2;b.position.y=.003;scene.add(b)}
+/* ---------- materials & helpers ---------- */
+const white=new THREE.MeshPhysicalMaterial({color:0xf6f7fa,roughness:.28,clearcoat:1,clearcoatRoughness:.12});
+const gray=new THREE.MeshStandardMaterial({color:0x4a4d53,roughness:.55});
+const black=new THREE.MeshPhysicalMaterial({color:0x08090c,roughness:.25,clearcoat:.7});
+const rimMat=new THREE.MeshPhysicalMaterial({color:0x08090c,roughness:.25,clearcoat:.7,emissive:0x7a3bff,emissiveIntensity:0});
+const linerMat=new THREE.MeshStandardMaterial({color:0x14161c,roughness:.6,emissive:0x6a2cff,emissiveIntensity:0});
+const floorMat=new THREE.MeshStandardMaterial({color:0x1d2028,roughness:.7,emissive:0x6a2cff,emissiveIntensity:0});
+const divMat=new THREE.MeshStandardMaterial({color:0x30343c,roughness:.45});
+const ledMat=new THREE.MeshBasicMaterial({color:0x2a3a5a});
+const offC=new THREE.Color(0x2a3a5a),onC=new THREE.Color(0x3d86ff);
+function rr(w,d,r,p){p=p||new THREE.Shape();const x=-w/2,y=-d/2,P=Math.PI;p.moveTo(x+r,y);p.lineTo(x+w-r,y);p.absarc(x+w-r,y+r,r,-P/2,0);p.lineTo(x+w,y+d-r);p.absarc(x+w-r,y+d-r,r,0,P/2);p.lineTo(x+r,y+d);p.absarc(x+r,y+d-r,r,P/2,P);p.lineTo(x,y+r);p.absarc(x+r,y+r,r,P,P*1.5);return p}
+const ring=(w,d,r,w2,d2,r2)=>{const s=rr(w,d,r);s.holes.push(rr(w2,d2,r2,new THREE.Path()));return s};
+function ext(s,h,bev){const g=new THREE.ExtrudeGeometry(s,{depth:h,bevelEnabled:bev>0,bevelSize:bev,bevelThickness:bev,bevelSegments:4,curveSegments:24});g.rotateX(-Math.PI/2);return g}
+function mesh(g,m,x=0,y=0,z=0,par){const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;(par||B).add(o);return o}
+/* ---------- basket model ---------- */
+const B=new THREE.Group();scene.add(B);
+const outer=rr(1.8,1.4,.4);
+mesh(ext(ring(1.8,1.4,.4,1.5,1.1,.28),2.4,.04),white,0,.3,0);              // main body
+mesh(ext(rr(1.76,1.36,.38),.3,.02),gray,0,0,0);                              // dark base
+mesh(ext(ring(1.72,1.32,.36,1.5,1.1,.28),.05,0),rimMat,0,2.74,0);            // black rim
+mesh(ext(ring(1.52,1.12,.27,1.46,1.06,.24),1.55,0),linerMat,0,1.2,0);        // interior liner
+{const g=new THREE.ShapeGeometry(rr(1.46,1.06,.24));g.rotateX(-Math.PI/2);mesh(g,floorMat,0,1.22,0)}
+const divider=mesh(new THREE.BoxGeometry(.05,.9,1.06),divMat,0,1.65,0);       // central divider
+const lidPivot=new THREE.Group();lidPivot.position.set(0,2.84,-.7);B.add(lidPivot);
+mesh(ext(rr(1.8,1.4,.4),.08,.03),white,0,0,.7,lidPivot);
+const glass=new THREE.MeshPhysicalMaterial({color:0x05060a,roughness:.1,clearcoat:1,transparent:true,opacity:.82});
+mesh(ext(rr(1.5,1.1,.28),.02,0),glass,0,.11,.7,lidPivot);
+const panel=new THREE.Group();panel.position.set(0,2.35,.76);B.add(panel);
+mesh(new THREE.BoxGeometry(.58,.36,.06),black,0,0,0,panel);
+const pc=document.createElement('canvas');pc.width=320;pc.height=190;const pt=new THREE.CanvasTexture(pc);pt.encoding=THREE.sRGBEncoding;
+const scr=new THREE.Mesh(new THREE.PlaneGeometry(.5,.3),new THREE.MeshBasicMaterial({map:pt}));scr.position.z=.032;panel.add(scr);
+mesh(new THREE.BoxGeometry(.32,.012,.01),ledMat,0,.14,.034,panel);
+mesh(new THREE.BoxGeometry(.5,.02,.03),ledMat,0,2.8,-.6);                    // rim LED strip
+[-1,1].forEach(s=>{const g=new THREE.ExtrudeGeometry(rr(.34,.44,.1),{depth:.03,bevelEnabled:true,bevelSize:.008,bevelThickness:.008,bevelSegments:3,curveSegments:16});g.rotateY(s*Math.PI/2);mesh(g,black,s*.94,2.1,0)});  // handles
+const ledLight=new THREE.PointLight(0x3a7bff,0,5);ledLight.position.set(0,2.95,-.2);B.add(ledLight);
+const uvLight=new THREE.PointLight(0x8a4bff,0,5);uvLight.position.set(0,2.2,0);B.add(uvLight);
+const uvTubeMat=new THREE.MeshBasicMaterial({color:0x2a2440});
+[-.38,.38].forEach(x=>[-.48,.48].forEach(z=>{const t=mesh(new THREE.CylinderGeometry(.014,.014,.55,8),uvTubeMat,x,2.66,z);t.rotation.z=Math.PI/2;t.castShadow=false}));
+/* vents (instanced, wrapped around the body outline) */
+{const pts=outer.getSpacedPoints(180),im=new THREE.InstancedMesh(new THREE.CircleGeometry(.017,8),new THREE.MeshBasicMaterial({color:0x6a707c}),1800),d=new THREE.Object3D();let n=0;
+for(let i=0;i<pts.length-1;i++){const p=pts[i],q=pts[i+1],tx=q.x-p.x,ty=q.y-p.y,l=Math.hypot(tx,ty)||1,nx=ty/l,nz=tx/l;
+if(-p.y<-.15||Math.abs(p.x)<.3)continue;
+for(let y=.45;y<1.55;y+=.065){if(y>.55+(Math.abs(p.x)-.3)*1.7)break;if((i+Math.round(y*15))%2)continue;
+d.position.set(p.x+nx*.047,y+(i%2)*.03,-p.y+nz*.047);d.rotation.set(0,Math.atan2(nx,nz),0);d.updateMatrix();im.setMatrixAt(n++,d.matrix)}}
+im.count=n;B.add(im)}
+/* mechanism (conceptual) */
+const mech=new THREE.Group();mech.visible=false;B.add(mech);
+mesh(new THREE.BoxGeometry(1.46,.03,.05),new THREE.MeshStandardMaterial({color:0x9aa4b8,metalness:.8,roughness:.3}),0,2.62,0,mech);
+const carr=mesh(new THREE.BoxGeometry(.14,.1,.12),new THREE.MeshStandardMaterial({color:0x1d6bff,emissive:0x1d6bff,emissiveIntensity:.5}),0,2.58,0,mech);
+const rod=mesh(new THREE.CylinderGeometry(.012,.012,1,8),new THREE.MeshStandardMaterial({color:0xbcc6d8,metalness:.9,roughness:.25}),0,2.2,0,mech);
+const scan=new THREE.Mesh(new THREE.PlaneGeometry(1.4,.9),new THREE.MeshBasicMaterial({color:0x4aa8ff,transparent:true,opacity:.35,side:2,blending:THREE.AdditiveBlending,depthWrite:false}));scan.position.set(0,1.75,0);scan.visible=false;B.add(scan);
+const pulse=new THREE.Mesh(new THREE.RingGeometry(1,1.04,64),new THREE.MeshBasicMaterial({color:0x3d86ff,transparent:true,opacity:0}));pulse.rotation.x=-Math.PI/2;pulse.position.y=.01;scene.add(pulse);
+const glow=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),g=x.createRadialGradient(64,64,8,64,64,64);g.addColorStop(0,'rgba(80,150,255,.9)');g.addColorStop(1,'rgba(80,150,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);
+const m=new THREE.Mesh(new THREE.PlaneGeometry(4.8,4.4),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));m.rotation.x=-Math.PI/2;m.position.y=.004;scene.add(m);return m})();
+/* fans + airflow */
+const fans=[-.38,.38].map(x=>{const g=new THREE.Group();g.position.set(x,1.95,-.53);B.add(g);mesh(new THREE.TorusGeometry(.13,.012,8,24),gray,0,0,0,g);
+for(let i=0;i<4;i++){const b=mesh(new THREE.BoxGeometry(.035,.11,.008),new THREE.MeshStandardMaterial({color:0x8793aa}),0,0,0,g);b.geometry.translate(0,.06,0);b.rotation.z=i*Math.PI/2}return g});
+const NP=170,pp=new Float32Array(NP*3),pv=[];for(let i=0;i<NP;i++){pp.set([(Math.random()-.5)*1.3,1.3+Math.random()*2.3,(Math.random()-.5)*.9],i*3);pv.push(.5+Math.random()*.9)}
+const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+const parts=new THREE.Points(pg,new THREE.PointsMaterial({color:0x7cc4ff,size:.045,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));B.add(parts);
+/* panel texture */
+let pk='';function drawPanel(){const k=''+S.power+S.uv+S.air+S.sorting+S.locked+S.laundry;if(k===pk)return;pk=k;const x=pc.getContext('2d'),on=S.power;x.fillStyle='#05070b';x.fillRect(0,0,320,190);x.fillStyle=on?'#3d7bff':'#1a2030';x.fillRect(90,12,140,7);
+const st=[on,S.laundry&&on,S.uv,S.air,S.locked,on];st.forEach((a,i)=>{const cx=60+(i%3)*100,cy=70+Math.floor(i/3)*70;x.lineWidth=5;x.strokeStyle=a?'#59b0ff':on?'#2a4fa8':'#232a3a';x.beginPath();x.arc(cx,cy,26,0,7);x.stroke();x.fillStyle=a?'#9fd0ff':on?'#1f3a7a':'#1a2030';x.beginPath();x.arc(cx,cy,8,0,7);x.fill()});pt.needsUpdate=true}
+/* ---------- camera ---------- */
+const V={iso:[[4.6,4.4,5.4],[0,1.5,0]],front:[[0,2.4,9],[0,1.5,0]],side:[[9,2.4,0],[0,1.5,0]],top:[[0,11,.01],[0,1.4,0]],sort:[[0,6.2,3.6],[0,1.9,0]],uv:[[3.8,3.2,4.6],[0,1.8,0]],close:[[0,4.9,3.1],[0,1.9,0]]};
+let camTw=null;function camTo(n,d=1.3){const v=V[n];camTw={p0:cam.position.clone(),t0:ctl.target.clone(),p1:new THREE.Vector3(...v[0]),t1:new THREE.Vector3(...v[1]),t:0,d}}
+cam.position.set(...V.iso[0]);ctl.target.set(...V.iso[1]);
+ctl.addEventListener('start',()=>camTw=null);
+/* ---------- laundry ---------- */
+let cloths=[];
+const lightC=[0xffffff,0xece8dc,0xcfd3da,0xf3d3dc,0xf8f8fa],darkC=[0x16171b,0x16306b,0x3c3f48,0x9c2630,0x2057d4];
+function lump(g,a){const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),h=k=>Math.sin(x*91+y*57+z*37+k)*43758.5%1;p.setXYZ(i,x+h(1)*a,y+h(2)*a*.8,z+h(3)*a)}g.computeVertexNormals();return g}
+function makeCloth(hex){const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:hex,roughness:.95,emissive:0x000000}),hsl={};new THREE.Color(hex).getHSL(hsl);
+const add=(geo,x,z,ry)=>{const o=new THREE.Mesh(lump(geo,.05),m);o.position.set(x,0,z);o.rotation.y=ry;o.castShadow=true;o.receiveShadow=true;g.add(o)};
+add(new THREE.BoxGeometry(.4,.09,.36,6,2,6),0,0,0);add(new THREE.BoxGeometry(.2,.07,.12,3,2,3),-.28,-.1,.35);add(new THREE.BoxGeometry(.2,.07,.12,3,2,3),.28,-.1,-.35);
+g.scale.setScalar(.72);g.userData={light:hsl.l>.6,mat:m};return g}
+function slot(sd,n){return{x:sd*(.4+(n%2?.03:-.03)),z:((n%3)-1)*.3+(Math.random()-.5)*.04,y:1.27+Math.floor(n/3)*.1,ry:(Math.random()-.5)*.8}}
+function clearCloths(){cloths.forEach(c=>scene.remove(c));cloths.forEach(c=>B.remove(c));cloths=[]}
+async function do_add(){S.loading=true;S.laundry=true;S.sorted=false;say('Laundry Added','Loading Laundry');for(let i=0;i<10;i++)sfx('drop',i*.14+.5);
+const sides=shuffle([-1,-1,-1,-1,-1,1,1,1,1,1]),cnt={'-1':0,'1':0},cols=shuffle([...lightC,...darkC]);
+cloths=cols.map((h,i)=>{const c=makeCloth(h),sd=sides[i],g=slot(sd,cnt[sd]++);c.userData.goal=g;c.userData.start={x:g.x+(Math.random()-.5)*.3,y:4.4+i*.18,z:g.z,r:[Math.random()*6,Math.random()*6]};c.position.set(c.userData.start.x,c.userData.start.y,g.z);c.visible=false;B.add(c);return c});
+await Promise.all(cloths.map((c,i)=>sleep(i*.14).then(()=>{c.visible=true;const s=c.userData.start,g=c.userData.goal;return anim(.9,u=>{const b=bounce(u);c.position.set(lerp(s.x,g.x,ease(u)),lerp(s.y,g.y,b),g.z);c.rotation.set(lerp(s.r[0],0,ease(u)),lerp(s.r[1],g.ry,ease(u)),0)})})));
+S.loading=false;S.op=idleOp();say('Laundry Added — '+cloths.length+' garments loaded')}
+async function do_scan(){S.scanning=true;say('Detecting Clothing Colors','Detecting Clothing Colors');scan.visible=true;sfx('scan');
+await anim(2.4,u=>{const z=-.5+1.0*u;scan.position.z=z;cloths.forEach(c=>{const f=Math.max(0,1-Math.abs(c.position.z-z)/.16);c.userData.mat.emissive.setRGB(.05*f,.35*f,.9*f)})});
+cloths.forEach(c=>c.userData.mat.emissive.setRGB(0,0,0));scan.visible=false;S.scanning=false;const L=cloths.filter(c=>c.userData.light).length;S.op=idleOp();say(`Detected ${L} light • ${cloths.length-L} dark/colored garments`)}
+async function do_sort(sp=1){if(S.lid!=='open')await do_lid(true);
+S.sorting=true;S.sorted=false;S.progress=0;say('Sorting started','Automatic Sorting');camTo('sort',1.4);mech.visible=true;
+const cnt={'-1':0,'1':0},order=[...cloths].sort((a,b)=>a.position.z-b.position.z),car=new THREE.Vector3(0,0,0);
+for(let i=0;i<order.length;i++){const c=order[i],sd=c.userData.light?-1:1,g=slot(sd,cnt[sd]++),p0=c.position.clone(),r0=c.rotation.y,c0=car.clone();c.userData.goal=g;sfx('click');sfx('click',.95/sp*.45);sfx('drop',.95/sp*.85);
+say(`Moving ${c.userData.light?'light':'dark'} garment ${c.userData.light?'← left':'→ right'}`);
+await anim(.95/sp,u=>{const a=seg(u,0,.22),b=seg(u,.22,.45),d=seg(u,.78,1),m=seg(u,.45,.78);
+let cx,cz;if(u<.45){cx=lerp(c0.x,p0.x,a);cz=lerp(c0.z,p0.z,a)}else{cx=lerp(p0.x,g.x,m);cz=lerp(p0.z,g.z,m)}
+car.set(cx,0,cz);const y=u<.45?lerp(p0.y,2.4,b):u<.78?2.4:lerp(2.4,g.y,d);
+if(u>=.22){c.position.set(cx,y,cz)}c.rotation.y=lerp(r0,g.ry,m);
+mech.position.z=cz;carr.position.x=cx;const len=Math.max(.05,2.58-(c.position.y+.06));rod.scale.y=len;rod.position.set(cx,2.58-len/2,0);rod.visible=u>.1&&u<.95});
+S.progress=Math.round((i+1)/order.length*100)}
+mech.visible=false;mech.position.z=0;S.sorting=false;S.sorted=true;S.progress=100;sfx('done');S.op=idleOp();say('Sorting complete — lights left, darks right');camTo('iso',1.4)}
+/* ---------- lid, power, uv, air ---------- */
+const LID_OPEN=1.95;let lidAng=0,lidTk=0,ledT=0,ledV=0,uvT=0,uvV=0,airOp=0,fanW=0;
+async function do_lid(o){const to=o?LID_OPEN:0,a0=lidAng,tk=++lidTk;S.lid=o?'open':'closed';say(o?'Lid Opening…':'Lid Closing…');sfx('hinge');
+await anim(1.1*Math.max(.25,Math.abs(to-a0)/LID_OPEN),u=>lidAng=lerp(a0,to,ease(u)),'lid');if(tk===lidTk){say(o?'Lid Open':'Lid Closed');sfx('thud')}}
+function do_power(on){S.power=on;sfx(on?'on':'off');if(on){ledT=1;say('Device Ready','Device Ready');pulse.material.opacity=.9;anim(1.4,u=>{pulse.scale.setScalar(1+u*1.6);pulse.material.opacity=.9*(1-u);ledV=Math.max(ledV,1.6-u*.6)},'pulse')}
+else{haltAll();ledT=0;S.op='Idle';say('Device Off — all processes stopped')}}
+async function do_uv(dur){if(S.lid!=='closed')await do_lid(false);
+S.uv=true;S.locked=true;S.progress=0;S.timer=dur;uvT=1;sfx('uvon');say('UV-C Simulation Active — lid locked','UV-C Simulation Active');camTo('uv',1.4);
+await anim(dur,u=>{S.progress=Math.round(u*100);S.timer=Math.ceil(dur*(1-u))});
+S.progress=100;S.timer=0;uvT=0;sfx('done');say('Cycle Complete — UV-C light off','Cycle Complete');await sleep(.8);S.uv=false;S.locked=false;say('Cycle Complete — lid unlocked');camTo('iso',1.4)}
+function do_air(on){S.air=on;sfx('air');if(on)say('Airflow Active','Airflow Active');else{S.op=S.uv?S.op:idleOp();say('Airflow Off')}}
+/* ---------- stop / reset / demo ---------- */
+function haltAll(){cancelAll();paused=false;S.paused=false;S.demo=false;S.step=0;S.sorting=S.scanning=S.loading=S.uv=S.locked=S.air=false;uvT=0;S.timer=0;mech.visible=false;scan.visible=false;rod.visible=false;
+lidAng=S.lid==='open'?LID_OPEN:0;cloths.forEach(c=>{const g=c.userData.goal;c.visible=true;c.position.set(g.x,g.y,g.z);c.rotation.y=g.ry;c.userData.mat.emissive.setRGB(0,0,0)})}
+function stopAll(){sfx('stop');const was=S.sorting||S.uv||S.air||S.demo||S.scanning||S.loading;haltAll();S.progress=0;S.op=idleOp();say(was?'Operation stopped safely':'Nothing running')}
+function resetSim(full){haltAll();clearCloths();S.laundry=S.sorted=false;S.progress=0;S.timer=0;if(full&&S.power){S.power=false;ledT=0}
+if(lidAng>0){S.lid='closed';do_lid(false)}S.lid='closed';S.op=idleOp();say(S.power?'Device Ready':'Simulation reset',S.op);camTo('iso',1.2)}
+async function runDemo(){resetSim(true);S.demo=true;
+const st=async(n,name,fn)=>{S.step=n;S.stepName=name;say(`Step ${n}/10 — ${name}`);sfx('step');await fn()};
+try{await sleep(.8);let up;
+await st(1,'POWER ON',async()=>{do_power(true);await sleep(2)});
+await st(2,'OPEN LID',()=>do_lid(true));
+await st(3,'LOAD LAUNDRY',do_add);
+await st(4,'COLOR DETECTION',do_scan);
+await st(5,'AUTOMATIC SORTING',()=>do_sort(2.6));
+await st(6,'CLOSE LID',()=>do_lid(false));
+await st(7,'UV-C MODE',async()=>{up=do_uv(7);await sleep(3.5)});
+await st(8,'AIRFLOW',async()=>{do_air(true);await sleep(3.5)});
+await st(9,'COMPLETE',async()=>{await up;do_air(false);say('Laundry Cycle Complete','Cycle Complete');await sleep(1.5)});
+await st(10,'REVEAL RESULTS',async()=>{await do_lid(true);camTo('close',1.8);await sleep(2.2)});
+S.demo=false;S.step=0;S.op=idleOp();say('Laundry Cycle Complete — demo finished')}catch(e){}}
+/* ---------- UI actions ---------- */
+const busy=()=>S.demo?(toast('Guided demo running — pause or stop it first'),true):S.paused?(toast('Paused — press Resume'),true):false;
+const A={
+power(){if(busy())return;if(S.sorting||S.uv){return toast('Stop the running operation first')}do_power(!S.power)},
+lid(){if(busy())return;if(S.locked)return toast('Lid locked — UV-C simulation active');if(S.sorting||S.loading)return toast('Please wait for the current operation');do_lid(S.lid!=='open')},
+add(){if(busy())return;if(S.laundry)return toast('Laundry already loaded');if(S.lid!=='open')return toast('Open the lid first');do_add()},
+sort(){if(busy())return;if(!S.power)return toast('Power on the basket first');if(!S.laundry)return toast('Add laundry first');if(S.loading||S.uv||S.sorting||S.scanning)return toast('Another operation is running');if(S.sorted)return toast('Laundry is already sorted');do_scan().then(()=>do_sort(1))},
+uv(){if(busy())return;if(!S.power)return toast('Power on the basket first');if(S.uv)return toast('UV-C simulation already running');if(S.sorting||S.loading||S.scanning)return toast('Wait until the current operation ends');do_uv(10)},
+air(){if(busy())return;if(!S.power)return toast('Power on the basket first');do_air(!S.air)},
+stop(){stopAll()},reset(){resetSim(false)},demo(){if(S.demo)return toast('Demo already running');runDemo()}};
+document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ac();sfx('tap');A[b.dataset.a]()});
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>camTo(b.dataset.v));
+$('dpause').onclick=()=>{if(!S.demo)return toast('No demo running');paused=true;S.paused=true;say('Demo paused')};
+$('dresume').onclick=()=>{if(!S.paused)return;paused=false;S.paused=false;say('Demo resumed')};
+$('drestart').onclick=()=>{haltAll();runDemo()};
+$('dstop').onclick=()=>{if(!S.demo)return toast('No demo running');stopAll();say('Demo stopped')};
+$('snd').onclick=()=>{ac();muted=!muted;if(master)master.gain.value=muted?0:.55;$('snd').textContent=muted?'🔇 Sound: Off':'🔊 Sound: On';sfx('tap')};
+$('fs').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+$('man').onclick=()=>$('modal').classList.add('o');$('mc').onclick=()=>$('modal').classList.remove('o');$('modal').onclick=e=>{if(e.target.id==='modal')$('modal').classList.remove('o')};
+const T={};document.querySelectorAll('.tile').forEach(t=>T[t.dataset.a]=t);
+const fmt=s=>'00:'+String(s).padStart(2,'0');
+function sync(){const st=!S.power?'Powered Off':S.uv?'UV-C Simulation Active':S.sorting?'Sorting':'Device Ready';
+$('st').textContent=st;$('dot').className='dot'+(S.power?' on':'');$('op').textContent=S.op;$('cur').textContent=S.op;$('pmsg').textContent=S.msg;
+['pbar','lbar'].forEach(i=>$(i).style.width=S.progress+'%');$('ppct').textContent=$('lpct').textContent=S.progress+'%';$('ptim').textContent=S.uv?'⏱ '+fmt(S.timer)+(S.locked?' · Locked':''):'';
+$('banner').textContent=S.demo?`DEMO STEP ${S.step}/10 — ${S.stepName}${S.paused?' (PAUSED)':''}`:'';$('banner').style.opacity=S.demo?1:0;
+$('s-power').textContent=S.power?'On':'Off';$('s-lid').textContent=S.locked?'Locked':S.lid==='open'?'Open':'Closed';$('l-lid').textContent=S.lid==='open'?'Close Lid':'Open Lid';
+$('s-add').textContent=S.laundry?'Loaded':'Empty';$('s-sort').textContent=S.sorting?S.progress+'%':S.sorted?'Sorted':'Idle';$('s-uv').textContent=S.uv?'Active':'Off';$('s-air').textContent=S.air?'Active':'Off';
+T.power.classList.toggle('act',S.power);T.lid.classList.toggle('act',S.lid==='open');T.add.classList.toggle('act',S.laundry);T.sort.classList.toggle('act',S.sorting);T.uv.classList.toggle('act',S.uv);T.air.classList.toggle('act',S.air);
+['sort','uv','air'].forEach(k=>T[k].classList.toggle('dim',!S.power));
+$('exp').textContent=S.scanning?'Simulated colour sensor sweeps the garments and classifies light vs dark.':S.sorting?'Conceptual rail + carriage moves each garment: lights to the left, darks to the right.':S.uv?'Visual-only UV-C representation of an experimental feature. Lid interlocked; no sterilization is claimed.':S.air?'Simulated ventilation fans and airflow particles circulate inside the basket.':'Web demo — phone link, sensors, sorting, UV-C and airflow are all simulated.';
+drawPanel()}
+/* ---------- main loop ---------- */
+function resize(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}addEventListener('resize',resize);resize();
+const clock=new THREE.Clock();
+function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;stepTasks(dt);
+if(camTw){camTw.t+=dt;const u=ease(clamp(camTw.t/camTw.d));cam.position.lerpVectors(camTw.p0,camTw.p1,u);ctl.target.lerpVectors(camTw.t0,camTw.t1,u);if(u>=1)camTw=null}
+lidPivot.rotation.x=-lidAng;
+ledV+=((ledT)-ledV)*.08;ledMat.color.copy(offC).lerp(onC,clamp(ledV));ledLight.intensity=ledV*.9;glow.material.opacity=clamp(ledV)*.35;glow.material.color.setRGB(1-uvV*.35,1-uvV*.6,1);ambient();
+uvV+=(uvT-uvV)*.06;const fl=uvV*(1+.08*Math.sin(t*30));uvLight.intensity=fl*2.4;linerMat.emissiveIntensity=uvV*.55;floorMat.emissiveIntensity=uvV*.9;rimMat.emissiveIntensity=uvV*.8;uvTubeMat.color.setRGB(.16+.5*uvV,.14+.2*uvV,.25+.75*uvV);
+airOp+=((S.air?1:0)-airOp)*.06;fanW+=((S.air?14:0)-fanW)*.05;fans.forEach((f,i)=>f.children.forEach(c=>{if(c.geometry.type==='BoxGeometry')c.rotation.z+=fanW*dt*(i?1:-1)}));
+parts.visible=airOp>.02;parts.material.opacity=airOp*.85;
+if(parts.visible){for(let i=0;i<NP;i++){let y=pp[i*3+1]+pv[i]*dt*(S.air?1:.3);pp[i*3]+=Math.sin(t*2+i)*.003;pp[i*3+2]+=Math.cos(t*1.7+i)*.002;if(y>3.8){y=1.25;pp[i*3]=(Math.random()-.5)*1.3;pp[i*3+2]=(Math.random()-.5)*.9}pp[i*3+1]=y}pg.attributes.position.needsUpdate=true;
+if(airOp>.5&&!S.sorting)cloths.forEach((c,i)=>{if(!S.loading)c.position.y=c.userData.goal.y+Math.sin(t*7+i)*.012;c.rotation.z=Math.sin(t*5+i)*.03})}
+else if(cloths.length&&!S.sorting)cloths.forEach(c=>{if(!S.loading)c.rotation.z=0});
+ctl.update();sync();R.render(scene,cam)}
+say('Press Power or RUN FULL DEMO to begin');S.msg='Device Off';frame();
+</script></body></html>
